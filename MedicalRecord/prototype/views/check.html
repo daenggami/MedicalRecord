@@ -1,0 +1,160 @@
+<!DOCTYPE HTML>
+<!--
+	Retrospect by TEMPLATED
+	templated.co @templatedco
+	Released for free under the Creative Commons Attribution 3.0 license (templated.co/license)
+-->
+<html>
+	<head>
+	   <!-- Bootstrap include -->
+	   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+	   <!-- fontawsome -->
+	   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.9.0/css/all.css">
+	   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.9.0/css/v4-shims.css">
+	   <script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
+	   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+	   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+   
+	   <meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0">		
+		<title>의무기록증명서 검증사이트 관리자페이지</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<link rel="stylesheet" href="assets/css/main.css" />
+		
+	</head>
+	<body>
+		<!-- Header -->
+			<header id="header">
+				<h1><a href="index.html">의무기록 증명서 검증사이트</a></h1>
+				<a href="#nav">Menu</a>
+			</header>
+
+		<!-- Nav -->
+			<nav id="nav">
+				<ul class="links">
+					<li><a href="index.html">메인페이지</a></li>
+					<li><a="#">관리자 메뉴</a></li>
+					<ul id="sub-menu">
+						<li><a href="generic.html">증명서 정보등록</a></li>
+						<li><a href="check.html">증명서 정보조회</a></li>
+					</ul>
+					<li><a href="elements.html">외부자 검증</a></li>
+				</ul>
+			</nav>
+
+		<!-- Main -->
+		<!-- Four -->
+		
+		<div class="container">
+			<div class="row justify-content-md-center">
+				<div class="inner">
+					<header class="major narrow">
+						<br><br><br><br>
+						<h2 align="center">조회</h2>
+						<p align="center">관리자는 작성된 증명서 정보를 조회할수 있습니다.</p>
+					</header>
+				<div id="query-alert"></div>
+				<div class="container 75%">
+					<div class="row uniform 50%">
+						<div class="8u$ 12u$(xsmall)">
+							<input type="text" id="find-PatNo" name="PatNo" placeholder="환자 번호"></div>
+						<div class="4u$ 12u$(xsmall)">
+							<button class="btn btn-primary" id="findN-btn">조회</button> <br><br>
+						</div>
+						<div class="8u$ 12u$(xsmall)">
+							<input type="text" id="find-TicketNumber" name="TicketNumber" placeholder="증명서 TicketNumber"></div>
+							<div class="4u$ 12u$(xsmall)">
+							<button class="btn btn-primary" id="findT-btn">조회</button> <br>
+						</div>
+						<div class="12u$" align="center"></div>
+						<br><br><br>
+						<table class="tablep">
+							<tbody id="tablep">
+							</tbody>
+						</table>
+										
+					</div>
+					<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+		                <!-- 테이블 안에 row를 하나씩 붙이는 곳 -->
+
+					</div>
+				</div>
+			</div>
+		</div>
+		</body>
+						<!-- Footer -->
+				<footer id="footer">
+					<div class="inner">
+						<ul class="copyright">
+							<li><a href="http://localhost:8080">개인정보처리방침</a>
+	
+							</li>
+							<li>&copy; AJOU 병원</li>
+						</ul>
+					</div>
+				</footer>
+		</div>
+		<!-- Scripts -->
+	</body>
+<script>    
+    $("#findN-btn").click(()=>{
+        const value = $("#find-PatNo").val();
+        const url = "/findPatNo"
+        $.post(url, {PatNo: value}, (data)=>{
+            // 조회했을 때 값이 null이 아니면 (일치하는 값이 존재한다면)
+            if(status != null){
+                $('#find-alert').append("<div id='success' class='alert alert-success'>환자 ID 조회를 성공했습니다!</div>");
+                $('#find-alert').fadeOut(2000);
+
+                // stringify는 json객체를 string으로, parse는 string을 json객체로 변환 시켜줌
+                const test = JSON.stringify(data)
+                const parsedData = JSON.parse(test)
+                $('#table').empty();
+                
+                // Line 69~ 86 : rates라는 key의 value로 Json array가 있으므로 반복문을 통해 한 줄씩 테이블에 넣어줌
+                for(var i = 0; i < parsedData.length; i++ ){
+					$('#table').append("<tr><th scope='row'>average</th><td>" + parsedData.PatNo + "</td></tr>")
+                    $('#table').append("<tr><th scope='row'>project title</th><td>" + parsedData.PatName + "</td></tr>")
+                    $('#table').append("<tr><th scope='row'>score</th><td>" + parsedData.RedcordHash + "</td></tr>")
+                }
+            }        
+        })
+    })
+	$("#findT-btn").click(()=>{
+        const value = $("#find-TicketNumber").val();
+        const url = "/findTicketNumber"
+        $.post(url, {TicketNumber: value}, (data)=>{
+            // 조회했을 때 값이 null이 아니면 (일치하는 값이 존재한다면)
+            if(status != null){
+                $('#find-alert').append("<div id='success' class='alert alert-success'>Ticket 정보 조회를 성공했습니다!</div>");
+                $('#find-alert').fadeOut(2000);
+
+                // stringify는 json객체를 string으로, parse는 string을 json객체로 변환 시켜줌
+                const test = JSON.stringify(data)
+                const parsedData = JSON.parse(test)
+
+				console.log(parsedData.PatName)
+				console.log(parsedData.PatNo)
+                $('#tablep').empty();
+                
+               // $('#table').append("<tr><th scope='row'>average</th><td>"+ parsedData.average + "</td></tr>")
+                // Line 69~ 86 : rates라는 key의 value로 Json array가 있으므로 반복문을 통해 한 줄씩 테이블에 넣어줌
+                //for(var i = 0; i < parsedData; i++ ){
+                $('#tablep').append("<tr><th scope='row'>PatName</th><td>" + parsedData.PatName + "</td></tr>")
+                $('#tablep').append("<tr><th scope='row'>PatNo</th><td>" + parsedData.PatNo + "</td></tr>")
+					//$('#table').append("<tr><th scope='row'>RecordHash</th><td>" + parsedData.rates[i].RecordHash + "</td></tr>")
+                //}
+            }        
+        })
+    })
+</script>
+<script src="assets/js/jquery.min.js"></script>
+<script src="assets/js/skel.min.js"></script>
+<script src="assets/js/util.js"></script>
+<!--[if lte IE 8]><script src="assets/js/ie/respond.min.js"></script><![endif]-->
+<script src="assets/js/main.js"></script>
+
+
+	</body>
+</html>
