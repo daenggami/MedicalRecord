@@ -39,7 +39,7 @@ async function cc_call(fn_name, args){
     }
     const gateway = new Gateway();
     await gateway.connect(ccp, { wallet, identity: 'user1', discovery: { enabled: false } });
-    const network = await gateway.getNetwork('mychannel');
+    const network = await gateway.getNetwork('medicalchannel');
     const contract = network.getContract('MedicalRecord');
 
     var result;
@@ -56,7 +56,10 @@ async function cc_call(fn_name, args){
         result = await contract.evaluateTransaction('queryPatNo', PatNo);
     else if(fn_name == 'queryTicket')
         result = await contract.evaluateTransaction('queryTicket', TicketNumber);
+    else if(fn_name == 'queryTX')
+        result = await contract.evaluateTransaction('queryTX', TicketNumber);
     else
+    
         result = 'not supported function'
 
     return result;
@@ -99,7 +102,7 @@ app.post('/findVerificationTicket/:VerificationTicket', async (req,res)=>{
     }
     const gateway = new Gateway();
     await gateway.connect(ccp, { wallet, identity: 'user1', discovery: { enabled: false } });
-    const network = await gateway.getNetwork('mychannel');
+    const network = await gateway.getNetwork('medicalchannel');
     const contract = network.getContract('MedicalRecord');
     const result = await contract.evaluateTransaction('VerificationTicket', VerificationTicket);
     const myobj = JSON.parse(result)
@@ -127,13 +130,18 @@ app.post('/findPatNo', async (req,res)=>{
     }
     const gateway = new Gateway();
     await gateway.connect(ccp, { wallet, identity: 'user1', discovery: { enabled: false } });
-    const network = await gateway.getNetwork('mychannel');
+    const network = await gateway.getNetwork('medicalchannel');
     const contract = network.getContract('MedicalRecord');
     const result = await contract.evaluateTransaction('queryPatNo', PatNo);
+
     console.log("result :" + result);
+    console.log(typeof(result)); 
+    console.log(typeof(JSON.stringify(result))); 
+
     const myobj = JSON.parse(result)
+    console.log("result :" + result);
+
     res.status(200).json(myobj)
-    // res.status(200).json(result)
 
 });
 
@@ -155,7 +163,7 @@ app.post('/findTicketNumber', async (req,res)=>{
     }
     const gateway = new Gateway();
     await gateway.connect(ccp, { wallet, identity: 'user1', discovery: { enabled: false } });
-    const network = await gateway.getNetwork('mychannel');
+    const network = await gateway.getNetwork('medicalchannel');
     const contract = network.getContract('MedicalRecord');
     const result = await contract.evaluateTransaction('queryTicket', TicketNumber);
     console.log(JSON.stringify(result));
@@ -163,6 +171,33 @@ app.post('/findTicketNumber', async (req,res)=>{
     res.status(200).json(myobj)
     // res.status(200).json(result)
 
+});
+
+app.post('/findtx', async (req,res)=>{
+    const TicketNumber = req.body.TicketNumber;
+    //console.log("TicketNumber: " + req.body.TicketNumber);
+    //console.log("TicketNumber_typeof: " + typeof(TicketNumber));
+    const walletPath = path.join(process.cwd(), 'wallet');
+    const wallet = new FileSystemWallet(walletPath);
+    console.log(`Wallet path: ${walletPath}`);
+
+    // Check to see if we've already enrolled the user.
+    const userExists = await wallet.exists('user1');
+    if (!userExists) {
+        console.log('An identity for the user "user1" does not exist in the wallet');
+        console.log('Run the registerUser.js application before retrying');
+        return;
+    }
+    const gateway = new Gateway();
+    await gateway.connect(ccp, { wallet, identity: 'user1', discovery: { enabled: false } });
+    const network = await gateway.getNetwork('medicalchannel');
+    const contract = network.getContract('MedicalRecord');
+    const result = await contract.evaluateTransaction('queryTX', TicketNumber);
+    console.log("result : " + result)
+    const myobj = JSON.parse(result)
+    console.log("myobj : " + myobj)
+    res.status(200).json(myobj)
+    //res.status(200).json(result)
 });
 
 // server start

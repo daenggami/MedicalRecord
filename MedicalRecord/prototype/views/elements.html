@@ -1,9 +1,4 @@
 <!DOCTYPE HTML>
-<!--
-	Retrospect by TEMPLATED
-	templated.co @templatedco
-	Released for free under the Creative Commons Attribution 3.0 license (templated.co/license)
--->
 <html>
 	<head>
 	   <!-- Bootstrap include -->
@@ -21,28 +16,26 @@
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<link rel="stylesheet" href="assets/css/main.css" />
-
+		
 	</head>
 	<body>
 		<!-- Header -->
 			<header id="header">
-				<h1><a href="index.html">의무기록 증명서 검증사이트</a></h1>
+				<h1><a href="index.html">의무기록 증명서 센터</a></h1>
 				<a href="#nav">Menu</a>
 			</header>
 
 		<!-- Nav -->
-			<nav id="nav">
-				<ul class="links">
-					<li><a href="index.html">메인페이지</a></li>
-					<li><a="#">관리자 메뉴</a></li>
-					<ul id="sub-menu">
-						<li><a href="generic.html">증명서 정보등록</a></li>
-						<li><a href="check.html">증명서 정보조회</a></li>
-					</ul>
-					<li><a href="elements.html">외부자 검증</a></li>
-				</ul>
-			</nav>
-
+		<nav id="nav">
+			<ul class="links">
+				<li><a href="index.html">메인페이지</a></li>
+				<li><a href="generic.html">증명서 정보등록</a></li>
+				<li><a href="check.html">증명서 정보조회</a></li>
+				<li><a href="txsearch.html">TX 정보조회</a></li>
+				<li><a href="recordsearch.html">의무기록 증명서 조회</a></li>
+				<li><a href="elements.html">외부자 검증</a></li>
+			</ul>
+		</nav>
 		<!-- Main -->
 		<!-- Four -->
 		
@@ -51,30 +44,38 @@
 				<div class="inner">
 					<header class="major narrow">
 						<br><br><br><br>
-						<h2 align="center">증명서 진위여부 조회</h2>
-						<p align="center">증명서 티켓번호로 증명서 진위여부를 조회할수 있습니다.</p>
+						<h2 align="center">조회</h2>
+						<p align="center">외부사용자는 작성된 증명서 정보를 조회할수 있습니다.<br>(개인정보 비식별화)</p>
 					</header>
-				<div id="new-alert"></div>
+				<div id="query-alert"></div>
 				<div class="container 75%">
 					<div class="row uniform 50%">
 						<div class="8u$ 12u$(xsmall)">
-							<input type="text" id="find-VerificationTicket" name="VerificationTicket" placeholder="증명서 TicketNumber"></div>
+							<input type="text" id="find-TicketNumber" name="TicketNumber" placeholder="증명서 TicketNumber"></div>
 							<div class="4u$ 12u$(xsmall)">
-							<button class="btn btn-primary" id="findV-btn">조회</button> <br>
+							<button class="btn btn-primary" id="findT-btn">조회</button> <br>
 						</div>
-						<div class="12u$" align="center">
-						
-							
-						</div>
+						<div class="12u$" align="center"></div>
+						<br><br><br>
+						<table class="table">
+							<tbody id="table">
+							</tbody>
+						</table>
+						<table class="tablep">
+							<tbody id="tablep">
+							</tbody>
+						</table>
+										
 					</div>
-					<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
-				</div>
-					
-				</div>   
-			</div>
-		
+					<br><br><br><br><br><br>
+		                <!-- 테이블 안에 row를 하나씩 붙이는 곳 -->
 
-				<!-- Footer -->
+					</div>
+				</div>
+			</div>
+		</div>
+		</body>
+						<!-- Footer -->
 				<footer id="footer">
 					<div class="inner">
 						<ul class="copyright">
@@ -89,26 +90,29 @@
 		<!-- Scripts -->
 	</body>
 <script>    
-	$("#findV-btn").click(()=>{
-        const value = $("#find-VerificationTicket").val();
-        const url = "/findVerificationTicket/" + value
-        $.post(url, {VerificationTicket: value}, (data)=>{
+	$("#findT-btn").click(()=>{
+        const value = $("#find-TicketNumber").val();
+        const url = "/findTicketNumber"
+        $.post(url, {TicketNumber: value}, (data)=>{
             // 조회했을 때 값이 null이 아니면 (일치하는 값이 존재한다면)
             if(status != null){
-                $('#find-alert').append("<div id='success' class='alert alert-success'>증명서 정보 조회를 성공했습니다!</div>");
-                $('#find-alert').fadeOut(2000);
+				$('#findT-alert').empty()
+                $('#findT-alert').append("<div id='success' class='alert alert-success'>Ticket 정보 조회를 성공했습니다!</div>");
+                $('#findT-alert').fadeOut(2000);
 
                 // stringify는 json객체를 string으로, parse는 string을 json객체로 변환 시켜줌
                 const test = JSON.stringify(data)
                 const parsedData = JSON.parse(test)
-                $('#table').empty();
-                
-               // $('#table').append("<tr><th scope='row'>average</th><td>" + parsedData.average + "</td></tr>")
-                // Line 69~ 86 : rates라는 key의 value로 Json array가 있으므로 반복문을 통해 한 줄씩 테이블에 넣어줌
-                for(var i = 0; i < parsedData.rates.length; i++ ){
-                    $('#table').append("<tr><th scope='row'>PatNo</th><td>" + parsedData.rates[i].PatNo + "</td></tr>")
-                    $('#table').append("<tr><th scope='row'>PatName</th><td>" + parsedData.rates[i].PatName + "</td></tr>")
-                }
+
+				console.log(parsedData.PatName)
+				console.log(parsedData.PatNo)
+                $('#tablep').empty();
+				$('#table').empty();
+                $('#tablep').append("<tr><th scope='row'>PatName</th><td>" + parsedData.PatName.slice(0,1) + "*" + parsedData.PatName.slice(-1)+ "</td></tr>")
+                $('#tablep').append("<tr><th scope='row'>PatNo</th><td>" + parsedData.PatNo.slice(0,1) + "*****" + parsedData.PatNo.slice(-1) + "</td></tr>")
+				$('#tablep').append("<tr><th scope='row'>RecordHash</th><td>" + parsedData.RecordHash + "</td></tr>")
+				$('#tablep').append("<tr><th scope='row'>TimeStamp</th><td>" + parsedData.TimeStamp.slice(0,19) + "</td></tr>")
+
             }        
         })
     })

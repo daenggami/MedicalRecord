@@ -13,12 +13,12 @@
         }
     },
     "channels": {
-        "mychannel": {
+        "medicalchannel": {
             "orderers": [
-                "orderer.example.com"
+                "orderer.medicalnet.com"
             ],
             "peers": {
-                "peer0.org1.example.com": {}
+                "peer0.org1.medicalnet.com": {}
             }
         }
     },
@@ -26,27 +26,27 @@
         "Org1": {
             "mspid": "Org1MSP",
             "peers": [
-                "peer0.org1.example.com"
+                "peer0.org1.medicalnet.com.com"
             ],
             "certificateAuthorities": [
-                "ca.example.com"
+                "ca.medicalnet.com"
             ]
         }
     },
     "orderers": {
-        "orderer.example.com": {
+        "orderer.medicalnet.com": {
             "url": "grpc://localhost:7050"
         }
     },
     "peers": {
-        "peer0.org1.example.com": {
+        "peer0.org1.medicalnet.com": {
             "url": "grpc://localhost:7051"
         }
     },
     "certificateAuthorities": {
-        "ca.example.com": {
+        "ca.medicalnet.com": {
             "url": "http://localhost:7054",
-            "caName": "ca.example.com"
+            "caName": "ca.medicalnet.com"
         }
     }
 }

@@ -4,12 +4,17 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 #
-# Exit on first error, print all commands.
+# Exit on first error, print all commands.r
 set -ev
+
+#export MSYS_NO_PATHCONV=1
+
+#ORDERER_CA=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/medicalnet.com/orderers/orderer.medicalnet.com/msp/tlscacerts/tlsca.medicalnet.com-cert.pem
+#PEER0_ORG1_CA=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.medicalnet.com/peers/peer0.org1.medicalnet.com/tls/ca.crt
 
 docker-compose -f docker-compose.yml down
 
-docker-compose -f docker-compose.yml up -d ca.example.com orderer.example.com couchdb1 couchdb2 couchdb3 peer0.org1.example.com  peer0.org2.example.com peer0.org3.example.com cli
+docker-compose -f docker-compose.yml up -d ca.medicalnet.com orderer.medicalnet.com couchdb1 couchdb2 couchdb3 peer0.org1.medicalnet.com  peer0.org2.medicalnet.com peer0.org3.medicalnet.com cli
 docker ps -a
 
 # wait for Hyperledger Fabric to start
@@ -19,14 +24,14 @@ export FABRIC_START_TIMEOUT=10
 sleep ${FABRIC_START_TIMEOUT}
 
 # Create the channel
-docker exec cli peer channel create -o orderer.example.com:7050 -c mychannel -f /etc/hyperledger/configtx/channel.tx
+docker exec cli peer channel create -o orderer.medicalnet.com:7050 -c medicalchannel -f /etc/hyperledger/configtx/channel.tx
 
-#Join peer0.org1.example.com to the channel.
-docker exec -e "CORE_PEER_LOCALMSPID=Org1MSP" -e "CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/msp/users/Admin@org1.example.com/msp" peer0.org1.example.com peer channel join -b /etc/hyperledger/configtx/mychannel.block
+#Join peer0.org1.medicalnet.com to the channel.
+docker exec -e "CORE_PEER_LOCALMSPID=Org1MSP" -e "CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/msp/users/Admin@org1.medicalnet.com/msp" peer0.org1.medicalnet.com peer channel join -b /etc/hyperledger/configtx/medicalchannel.block
 sleep 5
-# Join peer0.org2.example.com to the channel.
-docker exec -e "CORE_PEER_LOCALMSPID=Org2MSP" -e "CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/msp/users/Admin@org2.example.com/msp" peer0.org2.example.com peer channel join -b /etc/hyperledger/configtx/mychannel.block
+# Join peer0.org2.medicalnet.com to the channel.
+docker exec -e "CORE_PEER_LOCALMSPID=Org2MSP" -e "CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/msp/users/Admin@org2.medicalnet.com/msp" peer0.org2.medicalnet.com peer channel join -b /etc/hyperledger/configtx/medicalchannel.block
 sleep 5
-# Join peer0.org3.example.com to the channel.
-docker exec -e "CORE_PEER_LOCALMSPID=Org3MSP" -e "CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/msp/users/Admin@org3.example.com/msp" peer0.org3.example.com peer channel join -b /etc/hyperledger/configtx/mychannel.block
+# Join peer0.org3.medicalnet.com to the channel.
+docker exec -e "CORE_PEER_LOCALMSPID=Org3MSP" -e "CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/msp/users/Admin@org3.medicalnet.com/msp" peer0.org3.medicalnet.com peer channel join -b /etc/hyperledger/configtx/medicalchannel.block
 sleep 5

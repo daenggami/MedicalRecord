@@ -1,0 +1,115 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+	   <!-- Bootstrap include -->
+	   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+	   <!-- fontawsome -->
+	   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.9.0/css/all.css">
+	   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.9.0/css/v4-shims.css">
+	   <script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
+	   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+	   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+   
+	   <meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0">		
+		<title>의무기록증명서 검증사이트 관리자페이지</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<link rel="stylesheet" href="assets/css/main.css" />
+		
+	</head>
+	<body>
+		<!-- Header -->
+			<header id="header">
+				<h1><a href="index.html">의무기록 증명서 센터</a></h1>
+				<a href="#nav">Menu</a>
+			</header>
+
+		<!-- Nav -->
+		<nav id="nav">
+			<ul class="links">
+				<li><a href="index.html">메인페이지</a></li>
+				<li><a href="generic.html">증명서 정보등록</a></li>
+				<li><a href="check.html">증명서 정보조회</a></li>
+				<li><a href="txsearch.html">TX 정보조회</a></li>
+				<li><a href="recordsearch.html">의무기록 증명서 조회</a></li>
+				<li><a href="elements.html">외부자 검증</a></li>
+			</ul>
+		</nav>
+		<!-- Main -->
+		<!-- Four -->
+		
+		<div class="container">
+			<div class="row justify-content-md-center">
+				<div class="inner">
+					<header class="major narrow">
+						<br><br><br><br>
+						<h2 align="center">조회</h2>
+						<p align="center">관리자는 TX 정보를 조회할수 있습니다.</p>
+					</header>
+				<div id="querytx-alert"></div>
+				<div class="container 75%">
+					<div class="row uniform 50%">
+						<div class="8u$ 12u$(xsmall)">
+							<input type="text" id="find-tx" name="tx" placeholder="TictetNumber 입력"></div>
+						<div class="4u$ 12u$(xsmall)">
+							<button class="btn btn-primary" id="findtx-btn">조회</button> <br><br>
+						</div>
+						<div class="12u$" align="center"></div>
+						<br><br><br>
+						<table class="tabletx">
+							<tbody id="tabletx">
+							</tbody>
+						</table>										
+					</div>
+					<br><br><br><br><br><br>
+		                <!-- 테이블 안에 row를 하나씩 붙이는 곳 -->
+					</div>
+				</div>
+			</div>
+		</div>
+		</body>
+			<!-- Footer -->
+				<footer id="footer">
+					<div class="inner">
+						<ul class="copyright">
+							<li><a href="http://localhost:8080">개인정보처리방침</a>
+	
+							</li>
+							<li>&copy; AJOU 병원</li>
+						</ul>
+					</div>
+				</footer>
+		</div>
+		<!-- Scripts -->
+	</body>
+<script>    
+	$("#findtx-btn").click(()=>{
+        const value = $("#find-tx").val();
+        const url = "/findtx"
+        $.post(url, {TicketNumber: value}, (data)=>{
+
+            // 조회했을 때 값이 null이 아니면 (일치하는 값이 존재한다면)
+            if(status != null){
+                $('#findtx-alert').empty()
+                $('#findtx-alert').append("<div id='success' class='alert alert-success'>TX조회를 성공했습니다!</div>");
+                $('#findtx-alert').fadeIn(1000);
+                $('#findtx-alert').fadeOut(4000);
+                $('#tabletx').empty();
+                $('#tabletx').append("<tr><th scope='row'>txid</th><td>" + data[0].TxId + "</td></tr>")
+                $('#tabletx').append("<tr><th scope='row'>value</th><td>" + JSON.stringify(data[0].Value) + "</td></tr>")
+                $('#tabletx').append("<tr><th scope='row'>timestamp</th><td>" + data[0].Timestamp + "</td></tr>")
+                $('#tabletx').append("<tr><th scope='row'>isdelete</th><td>" + data[0].IsDelete + "</td></tr>")
+
+            }        
+        })
+    })
+</script>
+<script src="assets/js/jquery.min.js"></script>
+<script src="assets/js/skel.min.js"></script>
+<script src="assets/js/util.js"></script>
+<script src="assets/js/main.js"></script>
+
+
+	</body>
+</html>

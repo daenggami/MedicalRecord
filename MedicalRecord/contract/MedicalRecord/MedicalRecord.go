@@ -1,12 +1,12 @@
 package main
 
 import (
-	//"bytes"
+	"bytes"
 	"encoding/json"
 	"fmt"
-	"unicode/utf8"
+	"strconv"
+	"time"
 
-	//"strconv"
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 	sc "github.com/hyperledger/fabric/protos/peer"
 )
@@ -15,19 +15,10 @@ type SmartContract struct {
 }
 
 type MedicalRecord struct {
-	PatNo string `json:"PatNo"` //환자 ID
-	//TicketNumber string `json:"TicketNumber"` //티켓번호
-	RecordHash string `json:"RecordHash"` //의무기록 사본 HASH
-	PatName    string `json:"PatName"`    //환자 이름
-	//Deprivacy    string `json:"Deprivacy"`    //비식별화
-	//Hash         string `json:"Hash"`         //환자 이름
-	//	medical string `json:"medical"` 			//
-	//	test string `json:"test"`	 				//Composite key test
-	//	MainAilments string `json:"MainAilments"`	//주상병
-	//	SubAilments string `json:"SubAilments"`		//부상병
-	//	OccurDate string `json:"OccurDate"`			//발병일
-	//	DiagnosisDate string `json:"DiagnosisDate"`	//진단일
-	//	Opinion string `json:"Opinion"` 			//소견
+	PatNo      string    `json:"PatNo"`      //환자 ID
+	RecordHash string    `json:"RecordHash"` //의무기록 사본 HASH
+	PatName    string    `json:"PatName"`    //환자 이름
+	TimeStamp  time.Time `json:"TimeStamp"`  //시간정보
 }
 
 func (s *SmartContract) Init(MeRe shim.ChaincodeStubInterface) sc.Response {
@@ -42,17 +33,18 @@ func (s *SmartContract) Invoke(MeRe shim.ChaincodeStubInterface) sc.Response {
 		return s.initLedger(MeRe)
 	} else if function == "queryTicket" {
 		return s.queryTicket(MeRe, args)
+	} else if function == "queryTX" {
+		return s.queryTX(MeRe, args)
 	} else if function == "createRecordCopy" {
 		return s.createRecordCopy(MeRe, args)
-	} else if function == "VerificationTicket" {
-		return s.VerificationTicket(MeRe, args)
 	}
 	return shim.Error("Invalid Smart Contract function name.")
 }
 
+// 초기 데이터 입력 # 타임스템프 값은 없음.
 func (s *SmartContract) initLedger(MeRe shim.ChaincodeStubInterface) sc.Response {
 	medicalrecord := []MedicalRecord{
-		MedicalRecord{PatNo: "1024512", PatName: "hong", RecordHash: "ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb"},
+		MedicalRecord{PatNo: "1024512", PatName: "홍길동", RecordHash: "ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb"},
 		MedicalRecord{PatNo: "1124501", PatName: "임꺽정", RecordHash: "3e23e8160039594a33894f6564e1b1348bbd7a0088d42c4acb73eeaed59c009d"},
 		MedicalRecord{PatNo: "1310414", PatName: "성기훈", RecordHash: "2e7d2c03a9507ae265ecf5b5356885a53393a2029d241394997265a1a25aefc6"},
 		MedicalRecord{PatNo: "1489582", PatName: "강새벽", RecordHash: "18ac3e7343f016890c510e93f935261169d9e3f565436429830faf0934f4f8e4"},
@@ -87,6 +79,7 @@ func (s *SmartContract) initLedger(MeRe shim.ChaincodeStubInterface) sc.Response
 	return shim.Success(nil)
 }
 
+//환자 ID를 통해 해당 환자에게 증명서 티켓번호가 어떤것이 있는지 확인
 func (s *SmartContract) queryPatNo(MeRe shim.ChaincodeStubInterface, args []string) sc.Response {
 	//ex) queryPatNo "1234567"
 	if len(args) != 1 {
@@ -102,42 +95,40 @@ func (s *SmartContract) queryPatNo(MeRe shim.ChaincodeStubInterface, args []stri
 		return shim.Error(err.Error())
 	}
 	defer PatNoTicket.Close()
-	var i int
-	//var returnedPatNo string
-	//var returnedTicketNumber string
-	var responsePayload string
-	for i = 1; PatNoTicket.HasNext(); i++ {
+
+	var buffer bytes.Buffer
+	buffer.WriteString("[")
+
+	bArrayMemberAlreadyWritten := false
+	for PatNoTicket.HasNext() {
 		responseRange, err := PatNoTicket.Next()
-		if err != nil {
-			return shim.Error(err.Error())
-		}
 		_, compositeKeyParts, err := MeRe.SplitCompositeKey(responseRange.Key)
-		returnedPatNo := compositeKeyParts[0]
-		returnedTicketNumber := compositeKeyParts[1]
-
-		//const aa = '{"PatNo":compositeKeyParts[0], "TicketNumber":compositeKeyParts[1] }';
-		//fmt.Println("11111 : %s ", compositeKeyParts)
 		if err != nil {
 			return shim.Error(err.Error())
 		}
-		//var res := []MedicalRecord{PatNo: compositeKeyParts[0], PatName: compositeKeyParts[1]}
-		if returnedTicketNumber != "" {
-			//responseargs := []MedicalRecord{returninfo{returnedPatNo:compositeKeyParts[0], returnedTicketNumber:compositeKeyParts[1]}}
-			//responseargs, _ := args{returnedPatNo, returnedTicketNumber}
-
-			//var responseargs += MedicalRecord{PatNo: compositeKeyParts[0], TicketNumber: compositeKeyParts[1]}
-			//MedicalRecord += []string{i, returnedPatNo, returnedTicketNumber}
-			responsePayload += fmt.Sprintf("%d - PatNo : %s / TicketNumber : %s \n", i, returnedPatNo, returnedTicketNumber)
-			//responsePayload += args{returnedPatNo, returnedTicketNumber}
-			//RecordAsBytes, _ := json.Marshal(responseargs)
-			//responsePayload := args[returnedPatNo, returnedTicketNumber]
+		if bArrayMemberAlreadyWritten == true {
+			buffer.WriteString(",")
 		}
-	}
+		buffer.WriteString("{\"PatNo\":")
+		buffer.WriteString("\"")
+		buffer.WriteString(string(compositeKeyParts[0]))
+		buffer.WriteString("\"")
 
-	fmt.Println(responsePayload)
-	return shim.Success([]byte(responsePayload))
+		buffer.WriteString(", \"TicketNumber\":")
+		buffer.WriteString("\"")
+		buffer.WriteString(string(compositeKeyParts[1]))
+		buffer.WriteString("\"")
+		buffer.WriteString("}")
+		bArrayMemberAlreadyWritten = true
+	}
+	buffer.WriteString("]")
+
+	fmt.Printf("- QueryPatNo:\n%s\n", buffer.String())
+
+	return shim.Success(buffer.Bytes())
 }
 
+//증명서 티켓번호를 입력하여 정보호출
 func (s *SmartContract) queryTicket(MeRe shim.ChaincodeStubInterface, args []string) sc.Response {
 
 	if len(args) != 1 {
@@ -149,6 +140,7 @@ func (s *SmartContract) queryTicket(MeRe shim.ChaincodeStubInterface, args []str
 	return shim.Success(RecordAsBytes)
 }
 
+// 증명서 정보 입력
 func (s *SmartContract) createRecordCopy(MeRe shim.ChaincodeStubInterface, args []string) sc.Response {
 	//createRecordCopy PatNo, PatName, RecordHash
 	//ex) createRecordCopy "1234567", "김수동", "d11b8fa4d028090bfe3fe174a1e769eb35c901a4983d9c4248cd7cd9f8386431"
@@ -161,9 +153,9 @@ func (s *SmartContract) createRecordCopy(MeRe shim.ChaincodeStubInterface, args 
 	}
 	//objectType := "Record"
 	var Hash = args[2]
-
+	t := time.Now()
 	var TicketNumber = args[0] + Hash[0:9]
-	var Record = MedicalRecord{PatNo: args[0], PatName: args[1], RecordHash: args[2]}
+	var Record = MedicalRecord{PatNo: args[0], PatName: args[1], RecordHash: args[2], TimeStamp: t}
 	RecordAsBytes, _ := json.Marshal(Record)
 	MeRe.PutState(TicketNumber, RecordAsBytes)
 	indexName := "PatNo~TicketNumber"
@@ -179,65 +171,69 @@ func (s *SmartContract) createRecordCopy(MeRe shim.ChaincodeStubInterface, args 
 	return shim.Success(nil)
 }
 
-func (s *SmartContract) VerificationTicket(MeRe shim.ChaincodeStubInterface, args []string) sc.Response {
-	// VerificationTicket TicketNumber
-	//ex) VerificationTicket "1234567d11b8fa4d"
-	if len(args) != 1 {
+// 발급된 증명서 트랙젝션 확인
+func (t *SmartContract) queryTX(MeRe shim.ChaincodeStubInterface, args []string) sc.Response {
+
+	if len(args) < 1 {
 		return shim.Error("Incorrect number of arguments. Expecting 1")
-	} else if len(args[0]) != 16 {
-		return shim.Error("Ticket Number is 16-digit.")
 	}
 
-	RecordAsBytes, _ := MeRe.GetState(args[0])
-	//TicketNumber, PatNo, PatName, RecordHash
-	record := MedicalRecord{}
-	json.Unmarshal(RecordAsBytes, &record)
-	DePatNo := record.PatNo[:1] + "*****" + record.PatNo[6:]
-	//record.PatNo = args[1]
-	//record.PatName = args[2]
-	name := record.PatName
-	fmt.Println(name)
+	key := args[0]
 
-	//r, size := utf8.DecodeRune(name[:1])
+	fmt.Printf("- start getHistoryForKey: %s\n", key)
 
-	var lastname = []byte(record.PatName)
-	r, _ := utf8.DecodeRune(lastname)
-	fmt.Println("lastname: %c", r)
-	r, _ = utf8.DecodeLastRune(lastname)
-	fmt.Println("lastname: %c", r)
-	//fmt.Println("lastname: %s / string : %s /rune : %s / string(rune): %s / rune(string)", lastname, string(lastname), []rune(lastname), string([]rune(lastname)), []rune(string(lastname)))
-	fmt.Println("string : %c", string(lastname))
-	//fmt.Println(" string(rune): %c", []rune(lastname))
-	fmt.Println("rune(string) %c", []rune(string(lastname)))
-	//fmt.Println("string(rune) %c", string([]rune(lastname)))
+	resultsIterator, err := MeRe.GetHistoryForKey(key)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+	defer resultsIterator.Close()
 
-	var DePatName string
-	if len(record.PatName) == 2 {
-		DePatName = fmt.Sprintf("%s*", lastname)
-	} else if len(record.PatName) >= 3 {
-		var lastchrNum int
-		var starNum int
-		var star string
-		lastchrNum = len(record.PatName) - 1
-		starNum = len(record.PatName) - 2
-		//aaa = star * starNum
-		for i := 0; i < starNum; i++ {
-			star += "*"
+	var buffer bytes.Buffer
+	buffer.WriteString("[")
+
+	bArrayMemberAlreadyWritten := false
+	for resultsIterator.HasNext() {
+		response, err := resultsIterator.Next()
+		if err != nil {
+			return shim.Error(err.Error())
 		}
-		DePatName = fmt.Sprintf("%s,%s,%s", string(lastname), star, string(record.PatName[lastchrNum:]))
-	}
-	//DePatName2 := []rune(DePatName)
-	//fmt.Println(DePatName2)
-	fmt.Println("DePatName: %s_/name[:1]: %s_/record.PatName: %s / record.PatName[:1] : %s / rune : %s", DePatName, name[:1], record.PatName, record.PatName[:1], string([]rune(name)))
-	responsePayload := fmt.Sprintf("- PatNo : %s / PatName : %s", DePatNo, DePatName)
 
-	//DePatName := record.PatName[:1] + "***" + record.PatName[6:]
-	//fmt.Printf("- objectType : %s / PatNo : %s / TicketNumber : %s \n", objectType, returnedPatNo, returnedTicketNumber)
-	// fmt.Printf("PatNo : %s / PatName : %s", DePatNo, DePatName)
-	// 대충 비식별화 하는 기능 추가
-	// TicketNumber(16자리), DeName(홍*동), DePatNo(12****5),TimeStamp
-	return shim.Success([]byte(responsePayload))
+		if bArrayMemberAlreadyWritten == true {
+			buffer.WriteString(",")
+		}
+		buffer.WriteString("{\"TxId\":")
+		buffer.WriteString("\"")
+		buffer.WriteString(response.TxId)
+		buffer.WriteString("\"")
+
+		buffer.WriteString(", \"Value\":")
+
+		if response.IsDelete {
+			buffer.WriteString("null")
+		} else {
+			buffer.WriteString(string(response.Value))
+		}
+
+		buffer.WriteString(", \"Timestamp\":")
+		buffer.WriteString("\"")
+		buffer.WriteString(time.Unix(response.Timestamp.Seconds, int64(response.Timestamp.Nanos)).String())
+		buffer.WriteString("\"")
+
+		buffer.WriteString(", \"IsDelete\":")
+		buffer.WriteString("\"")
+		buffer.WriteString(strconv.FormatBool(response.IsDelete))
+		buffer.WriteString("\"")
+
+		buffer.WriteString("}")
+		bArrayMemberAlreadyWritten = true
+	}
+	buffer.WriteString("]")
+
+	fmt.Printf("- getHistoryForKey returning:\n%s\n", buffer.String())
+
+	return shim.Success(buffer.Bytes())
 }
+
 func main() {
 
 	err := shim.Start(new(SmartContract))
