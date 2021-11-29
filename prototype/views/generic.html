@@ -1,0 +1,109 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+	   <!-- Bootstrap include -->
+	   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+	   <!-- fontawsome -->
+	   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.9.0/css/all.css">
+	   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.9.0/css/v4-shims.css">
+	   <script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
+	   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+	   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+   
+	   <meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0">		
+		<title>의무기록증명서 검증사이트 관리자페이지</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<link rel="stylesheet" href="assets/css/main.css" />
+		
+	</head>
+	<body>
+		<!-- Header -->
+			<header id="header">
+				<h1><a href="index.html">의무기록 증명서 센터</a></h1>
+				<a href="#nav">Menu</a>
+			</header>
+
+		<!-- Nav -->
+		<nav id="nav">
+			<ul class="links">
+				<li><a href="index.html">메인페이지</a></li>
+				<li><a href="generic.html">증명서 정보등록</a></li>
+				<li><a href="check.html">증명서 정보조회</a></li>
+				<li><a href="txsearch.html">TX 정보조회</a></li>
+				<li><a href="recordsearch.html">의무기록 증명서 조회</a></li>
+				<li><a href="elements.html">외부자 검증</a></li>
+			</ul>
+		</nav>
+		<!-- Main -->
+		<!-- Four -->
+		<div class="container">
+			<div class="row justify-content-md-center">
+				<div class="inner">
+					<header class="major narrow">
+						<br><br><br><br>
+						<h2 align="center">등록</h2>
+						<p align="center">관리자는 증명서 정보를 입력해주시기 바랍니다.</p>
+					</header>
+				<div id="new-alert"></div>
+				<div class="container 75%">
+					<div class="row uniform 50%">
+						<div class="6u 12u$(xsmall)">
+							<input type="text" id="new-PatNo" name="PatNo" placeholder="환자 번호(7자리)"> <br>
+						</div>
+						<div class="6u$ 12u$(xsmall)">
+							<input type="text" id="new-PatName" name="PatName" placeholder="환자 이름"> <br>
+						</div>
+						<div class="12u$">
+							<input type="text" id="new-RecordHash" name="RecordHash" placeholder="증명서 Hash(64자리)"> <br>
+						</div>
+						<div class="12u$" align="center">
+						<button class="btn btn-primary" id="new-btn">등록</button>
+						</div>
+					</div>
+					<br><br><br><br><br><br>
+					</div>
+				</div>
+			</div>
+		</div>
+		<!-- Footer -->
+			<footer id="footer">
+				<div class="inner">
+					<ul class="copyright">
+						<li><a href="http://localhost:8080">개인정보처리방침</a>
+						</li>
+						<li>&copy; AJOU 병원</li>
+					</ul>
+				</div>
+			</footer>
+	</div>
+	<!-- Scripts -->
+</body>
+<script>    
+    $("#new-btn").click(()=>{
+        // new-email이라는 id값을 가지고 있는 input의 value를 가지고 옴
+        const No = $("#new-PatNo").val();
+		const Name = $("#new-PatName").val();
+		const Hash = $("#new-RecordHash").val();
+        const url = "/newRecord"
+
+        // email이라는 파라메터에 위의 value를 넣음
+        $.post(url, {PatNo: No,PatName: Name, RecordHash: Hash }, (data,status)=>{
+            // http 상태 코드가 200(success)이라면
+            if(status == "success"){
+                // 성공했다는 alert창을 띄움
+				$('#new-alert').empty()
+                $('#new-alert').append("<div id='success' class='alert alert-success'>의무기록증명서 발급정보 등록을 성공했습니다!</div>");
+                $('#new-alert').fadeOut(4000);
+            }
+        })
+    })
+</script>
+<script src="assets/js/jquery.min.js"></script>
+<script src="assets/js/skel.min.js"></script>
+<script src="assets/js/util.js"></script>
+<script src="assets/js/main.js"></script>
+
+	</body>
+</html>
